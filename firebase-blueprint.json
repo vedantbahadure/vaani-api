@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profiles",
+      "description": "Registered and authenticated rural citizens & village kiosk operators",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "lastLoginAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "conversations": {
+      "title": "Conversations",
+      "description": "Multi-turn grounded discussions and voice sessions for users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "language": { "type": "string" },
+        "model": { "type": "string" },
+        "persona": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title"]
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "User prompts, AI answers, citations, and groundings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "assistant", "system"] },
+        "content": { "type": "string" },
+        "language": { "type": "string" },
+        "confidence": { "type": "number" },
+        "grounded": { "type": "boolean" },
+        "citations": { "type": "array" },
+        "groundingMetadata": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "conversationId", "userId", "role", "content"]
+    },
+    "savedBookmarks": {
+      "title": "Saved Bookmarks",
+      "description": "User bookmarked advice, scheme rules, and contact info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "messageId": { "type": "string" },
+        "conversationId": { "type": "string" },
+        "content": { "type": "string" },
+        "note": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "content"]
+    }
+  }
+}

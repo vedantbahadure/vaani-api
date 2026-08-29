@@ -1,0 +1,6 @@
+{
+  "name": "VAANI — AI for Rural India",
+  "description": "Verified, multilingual, voice-first AI for rural governance in India, covering government schemes, cooperatives, and crop insurance.",
+  "requestFramePermissions": ["microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
