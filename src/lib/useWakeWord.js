@@ -21,7 +21,10 @@ export function useWakeWord({ enabled, onWake, paused }) {
 
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR || !enabled || paused) { stop(); return; }
+    if (!SR || !enabled || paused) {
+      stop();
+      return;
+    }
     const rec = new SR();
     rec.continuous = true;
     rec.interimResults = true;
@@ -29,15 +32,18 @@ export function useWakeWord({ enabled, onWake, paused }) {
     activeRef.current = true;
     rec.onresult = (e) => {
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        const txt = (e.results[i][0].transcript || "").toLowerCase();
-        if (txt.includes("vaani") || txt.includes("वाणी") || txt.includes("bani") || txt.includes("wani")) {
+        const result = e.results[i][0];
+        const txt = (result.transcript || "").toLowerCase().trim();
+        
+        // Exact or close match for vaani
+        if (txt.includes("vaani") || txt === "vaani" || txt.endsWith(" vaani")) {
           onWake && onWake();
           break;
         }
       }
     };
     rec.onend = () => { if (activeRef.current) { try { rec.start(); } catch {} } };
-    rec.onerror = () => {};
+    rec.onerror = (e) => { console.error("Wake word error:", e.error); };
     try { rec.start(); recRef.current = rec; } catch {}
     return () => { activeRef.current = false; try { rec.stop(); } catch {} };
   }, [enabled, paused, onWake, stop]);

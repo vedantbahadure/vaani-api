@@ -1,14 +1,17 @@
 import React from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Home, MessageCircle, BookOpen, FileText, History, Activity, Settings, Wifi, WifiOff, Compass } from "lucide-react";
+import { Home, MessageCircle, BookOpen, FileText, History, Activity, Settings, Wifi, WifiOff, Compass, FileCheck, Cpu } from "lucide-react";
 import { ThemeToggle, LanguageSwitcher } from "../components/Controls";
 import { AuthButton } from "../components/AuthButton";
+import { BatteryIndicator } from "../components/BatteryIndicator";
 import { useLang, useOrb, useOnline } from "../lib/contexts";
 import { t } from "../lib/i18n";
 
 const NAV = [
   { to: "/app", key: "nav_home", icon: Home, end: true },
   { to: "/app/chat", key: "nav_chat", icon: MessageCircle },
+  { to: "/app/forms", key: "nav_forms", icon: FileCheck },
+  { to: "/app/nlp", key: "nav_nlp", icon: Cpu },
   { to: "/app/knowledge", key: "nav_knowledge", icon: BookOpen },
   { to: "/app/documents", key: "nav_documents", icon: FileText },
   { to: "/app/maps", key: "nav_maps", icon: Compass },
@@ -73,6 +76,7 @@ export default function AppShell() {
             <span className="uppercase tracking-[0.2em] font-mono">{orbState}</span>
           </div>
           <div className="flex items-center gap-3">
+            <BatteryIndicator />
             <AuthButton />
             <LanguageSwitcher />
             <ThemeToggle />
@@ -86,7 +90,7 @@ export default function AppShell() {
 
       {/* Mobile bottom dock */}
       <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 px-2 py-2 rounded-full glass shadow-xl" data-testid="mobile-dock">
-        {NAV.slice(0, 7).map((n) => (
+        {NAV.slice(0, 6).map((n) => (
           <NavLink
             key={n.to}
             to={n.to}

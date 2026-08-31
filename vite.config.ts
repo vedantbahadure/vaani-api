@@ -14,4 +14,15 @@ export default defineConfig({
     port: 3000,
     allowedHosts: true,
   },
+  build: {
+    target: "es2022",
+    minify: "esbuild",
+    cssMinify: "esbuild",
+    sourcemap: false,
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+      },
+    },
+  },
 });

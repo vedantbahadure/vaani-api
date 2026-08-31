@@ -6,6 +6,7 @@ export interface SeedDoc {
 }
 
 export const SEED_DOCS: SeedDoc[] = [
+  // --- 1. AGRICULTURE & CROP SCHEMES ---
   {
     title: "PM-KISAN Samman Nidhi Scheme",
     domain: "schemes",
@@ -24,12 +25,26 @@ year, and professionals like doctors, engineers, lawyers and chartered accountan
 
 How to apply: Farmers can register through the PM-KISAN portal (pmkisan.gov.in), the PM-KISAN
 mobile app, or the nearest Common Service Centre (CSC). Required documents include Aadhaar card,
-bank account details, and land record/ownership documents. Aadhaar-based e-KYC is mandatory to
-receive instalments. Farmers can check beneficiary status and correct details on the portal.
+bank account details, and land record/ownership documents (7/12 extract / Khatauni). Aadhaar-based
+e-KYC (via OTP, biometric, or face authentication on PM-KISAN app) is mandatory to receive instalments.
 
-Key points for farmers: Ensure your name in land records, Aadhaar and bank account match. Keep
-your bank account linked to Aadhaar (DBT enabled). If an instalment is not received, verify the
-beneficiary status online and check for e-KYC completion or name mismatch issues.`,
+Key troubleshooting for farmers: Ensure name spelling matches identically across land records,
+Aadhaar and bank account. Keep bank account seeded with Aadhaar for DBT. If an instalment is held up,
+check beneficiary status online for 'Land Seeding', 'e-KYC Done', and 'Aadhaar Bank Seeding' status.`,
+  },
+  {
+    title: "Namo Shetkari Mahasanman Nidhi Yojana (Maharashtra)",
+    domain: "schemes",
+    source: "mahadbt.maharashtra.gov.in",
+    text: `Namo Shetkari Mahasanman Nidhi Yojana is a Maharashtra state government scheme launched in
+2023 to provide additional annual financial assistance of Rs 6,000 to eligible farmers in Maharashtra.
+Combined with the central PM-KISAN scheme (Rs 6,000), eligible farmers in Maharashtra receive a total
+of Rs 12,000 per year across six instalments of Rs 2,000 each.
+
+Eligibility: All farmers in Maharashtra approved under the PM-KISAN portal are automatically eligible.
+No separate application is required if PM-KISAN e-KYC and land seeding are verified.
+Disbursement: Transferred via DBT directly to Aadhaar-linked bank accounts. Farmers can check status
+on the MahaDBT portal or PM-KISAN portal.`,
   },
   {
     title: "Pradhan Mantri Fasal Bima Yojana (PMFBY) - Crop Insurance",
@@ -37,270 +52,429 @@ beneficiary status online and check for e-KYC completion or name mismatch issues
     source: "pmfby.gov.in",
     text: `Pradhan Mantri Fasal Bima Yojana (PMFBY) is the flagship crop insurance scheme of the
 Government of India, launched in 2016. It provides comprehensive risk cover for crops against
-non-preventable natural risks from the pre-sowing to post-harvest stage, aiming to stabilise the
-income of farmers and encourage them to adopt modern agricultural practices.
+non-preventable natural risks from pre-sowing to post-harvest stages.
 
-Premium rates paid by farmers are kept low: a maximum of 2% of the sum insured for Kharif food
-and oilseed crops, 1.5% for Rabi food and oilseed crops, and 5% for annual commercial and
-horticultural crops. The remaining premium is shared by the central and state governments.
+Premium rates paid by farmers: Maximum 2% of sum insured for Kharif food/oilseed crops, 1.5% for
+Rabi food/oilseed crops, and 5% for annual commercial/horticultural crops. In states like Maharashtra,
+farmers pay only a symbolic token of Rs 1 per application, with the state covering the farmer share.
 
-Coverage: Yield losses due to drought, dry spells, flood, inundation, pests and diseases,
-landslides, natural fire and lightning, storm, hailstorm and cyclone are covered. The scheme also
-covers prevented sowing, mid-season adversity, post-harvest losses (for up to 14 days after
-harvest for crops kept in the field for drying) and localised calamities such as hailstorm,
-landslide and inundation.
+Coverage: Prevented sowing/planting risk, mid-season adversity (drought, flood, unseasonal rains),
+standing crop yield losses, localized calamities (hailstorm, landslide, inundation, cloudburst),
+and post-harvest losses up to 14 days after harvesting for crops kept in the field for drying.
 
-Enrolment: For loanee farmers who take crop loans / Kisan Credit Card for notified crops,
-enrolment may be voluntary. Non-loanee farmers can enrol through banks, insurance company agents,
-CSCs, or the National Crop Insurance Portal (pmfby.gov.in). Farmers must report crop loss within
-72 hours of the event through the crop insurance app, toll-free number, bank or agriculture
-department. Documents needed: land records, sowing certificate/declaration, bank account and
-Aadhaar.`,
+Crucial 72-Hour Loss Reporting: In the event of localized calamity or post-harvest loss, the farmer
+MUST report the incident within 72 hours via the Crop Insurance App, toll-free number 14447 / 1800-180-1551,
+or to the local Taluka Agriculture Officer / Bank branch. Required docs: Crop sowing certificate,
+7/12 land extract, bank passbook, and geo-tagged photos of crop damage.`,
   },
   {
-    title: "Primary Agricultural Credit Societies (PACS)",
-    domain: "pacs",
-    source: "Ministry of Cooperation",
-    text: `Primary Agricultural Credit Societies (PACS) are the foundation of the three-tier
-short-term cooperative credit structure in India, operating at the village level. Above PACS are
-District Central Cooperative Banks (DCCBs) at the district level and State Cooperative Banks
-(StCBs) at the state level. PACS provide short-term and medium-term credit and other services
-directly to farmer members.
-
-Functions of PACS: providing crop loans and agricultural credit to members, supplying
-agricultural inputs such as seeds and fertilizers, distributing essential commodities through
-fair price shops, procurement and storage of foodgrains, and offering banking and deposit
-services in rural areas. Many PACS also act as service delivery points for government schemes.
-
-Computerisation: The Government of India, through the Ministry of Cooperation, is computerising
-around 63,000 functional PACS onto a common national software (ERP) linked with NABARD and the
-cooperative banks. This improves transparency, speeds up loan processing, and enables PACS to
-offer new services. PACS are being encouraged to diversify into activities such as running
-Common Service Centres, PM Kisan Samruddhi Kendras, LPG and petrol distribution, and Jan Aushadhi
-Kendras.
-
-Membership: Any farmer or rural resident in the area of operation can become a member by
-purchasing a share and paying a nominal fee. Members get voting rights on a one-member-one-vote
-basis, reflecting the democratic cooperative principle.`,
-  },
-  {
-    title: "Cooperative Societies Law - Basic Principles and Member Rights",
-    domain: "cooperative",
-    source: "Cooperative Societies Act",
-    text: `A cooperative society is a voluntary association of persons who join together to meet
-their common economic, social and cultural needs through a jointly owned and democratically
-controlled enterprise. In India, cooperatives are governed by state Cooperative Societies Acts and
-by the Multi-State Cooperative Societies Act, 2002 for societies operating in more than one state.
-The 97th Constitutional Amendment recognised the right to form cooperatives as a fundamental right.
-
-Seven cooperative principles guide all societies: (1) voluntary and open membership, (2) democratic
-member control, (3) member economic participation, (4) autonomy and independence, (5) education,
-training and information, (6) cooperation among cooperatives, and (7) concern for community.
-
-Member rights: Every member has the right to attend general body meetings, to vote on a one-member-
-one-vote basis regardless of shareholding, to stand for election to the managing committee, to
-inspect books and records as provided by the bye-laws, to receive a share of surplus (dividend) as
-declared, and to receive services from the society. Members also have duties, including attending
-meetings, repaying dues on time, and abiding by the bye-laws.
-
-Governance: A cooperative is managed by a democratically elected managing committee (board), which
-is accountable to the general body. Societies must maintain proper accounts, undergo annual audit by
-the cooperative department or an approved auditor, and file returns. Disputes are usually resolved
-through the Registrar of Cooperative Societies or a cooperative tribunal rather than civil courts.`,
-  },
-  {
-    title: "Kisan Credit Card (KCC) Scheme",
+    title: "Kisan Credit Card (KCC) & Interest Subvention Scheme",
     domain: "finance",
-    source: "NABARD / RBI",
-    text: `The Kisan Credit Card (KCC) scheme provides farmers with timely and adequate credit
-for their cultivation and other needs through a single simplified credit facility. It was
-introduced in 1998 and has been extended to cover animal husbandry and fisheries as well.
+    source: "nabard.org / rbi.org.in",
+    text: `The Kisan Credit Card (KCC) scheme provides farmers with timely, flexible, and affordable
+institutional credit for crop cultivation, post-harvest expenses, farm asset maintenance, and allied
+activities (dairy, poultry, fisheries, goat farming).
 
-Purpose: KCC meets the short-term credit requirements for crop cultivation, post-harvest expenses,
-produce marketing, consumption needs of the farmer household, working capital for maintenance of
-farm assets, and investment credit for agriculture and allied activities.
+Loan limits & Subsidised Interest: Farmers can get short-term crop loans up to Rs 3 Lakh at a benchmark
+subsidised rate of 7% per annum. Under the Modified Interest Subvention Scheme (MISS), farmers who
+repay their loans on or before the due date receive an additional 3% Prompt Repayment Incentive (PRI),
+bringing the effective interest rate down to just 4% per annum. Collateral-free loan limit is up to
+Rs 1.60 Lakh (extendable up to Rs 2 Lakh with tie-up agreements).
 
-Interest and benefits: Under the interest subvention scheme, crop loans up to Rs 3 lakh are
-available at a subsidised rate. Farmers who repay on time receive a prompt repayment incentive,
-effectively reducing the interest rate further (commonly to around 4% per annum for prompt payers).
-The card is typically valid for five years with annual review. Loans up to a specified limit (as
-revised by RBI, e.g., Rs 1.6 lakh) may be given without collateral.
-
-How to apply: Farmers can apply at any commercial bank, regional rural bank, or cooperative bank /
-PACS, or through the PM-KISAN linked KCC drive. Documents required include identity proof (Aadhaar),
-address proof, land records, and a passport-size photograph. KCC holders also get personal accident
-insurance cover. Farmers should use KCC credit for productive purposes and repay within the crop
-season to retain the interest subvention benefit.`,
+Validity: KCC is valid for 5 years with an annual review. It also includes free personal accidental
+insurance cover up to Rs 50,000 against death or permanent disability.
+Application: Through nationalised banks, regional rural banks (RRB), district cooperative banks (DCCB),
+PACS, or the unified Kisan Rin Portal (krishirin.dac.gov.in).`,
   },
   {
-    title: "Soil Health Card Scheme",
-    domain: "agriculture",
-    source: "soilhealth.dac.gov.in",
-    text: `The Soil Health Card (SHC) scheme, launched in 2015, provides farmers with a report on
-the nutrient status of their soil along with recommendations on the appropriate dosage of
-nutrients and fertilizers to improve soil health and fertility.
-
-What it contains: A Soil Health Card reports 12 parameters of the soil, including the primary
-nutrients Nitrogen (N), Phosphorus (P) and Potassium (K), secondary nutrient Sulphur (S),
-micronutrients (Zinc, Iron, Copper, Manganese, Boron), and physical parameters such as pH,
-Electrical Conductivity (EC) and Organic Carbon (OC). Based on these, it gives crop-wise
-recommendations of fertilizers and soil amendments.
-
-Benefits: By applying fertilizers based on the card's recommendations, farmers can avoid over-use
-or under-use of fertilizers, reduce input costs, improve soil health over time, and increase crop
-yield and quality. Balanced use of nutrients also protects the environment.
-
-How to get it: Soil samples are collected from farmers' fields by the state agriculture department
-on a fixed cycle, tested in soil testing laboratories, and cards are distributed to farmers.
-Farmers can also approach the local Krishi Vigyan Kendra (KVK) or agriculture office. The card is
-typically issued once every crop cycle so that recommendations stay current with the soil's
-changing condition.`,
-  },
-  {
-    title: "e-NAM - National Agriculture Market",
-    domain: "agriculture",
-    source: "enam.gov.in",
-    text: `e-NAM (electronic National Agriculture Market) is a pan-India electronic trading portal
-that networks existing Agricultural Produce Market Committee (APMC) mandis to create a unified
-national market for agricultural commodities. It was launched in 2016.
-
-Objective: e-NAM aims to promote transparency in price discovery, provide farmers with access to a
-larger number of buyers beyond their local mandi, and enable them to get better and remunerative
-prices for their produce through online competitive bidding.
-
-How it works: Farmers bring produce to a participating mandi where it is assayed (quality tested).
-The lot is listed online, and traders from across the country can bid for it. Once a bid is
-accepted, payment is made to the farmer, often directly to the bank account. Farmers can also see
-prevailing prices across mandis to make informed selling decisions.
-
-Benefits: reduced dependence on middlemen, transparent auctions, quality-based pricing, and online
-payments. Farmers Producer Organisations (FPOs) can also trade on e-NAM. To participate, farmers
-register at the mandi or through the e-NAM portal/app with basic details and bank account
-information. e-NAM currently integrates a large number of mandis across many states and union
-territories.`,
-  },
-  {
-    title: "Financial Literacy - Banking, Savings and Digital Payments for Rural Citizens",
-    domain: "finance",
-    source: "RBI Financial Literacy",
-    text: `Financial literacy helps rural citizens manage money safely, save for the future, and
-use banking and digital services with confidence. The foundation is a bank account.
-
-Jan Dhan account: Under the Pradhan Mantri Jan Dhan Yojana (PMJDY), any citizen can open a basic
-savings bank account with zero minimum balance. It comes with a RuPay debit card, accident
-insurance cover, and access to overdraft facility subject to conditions. Jan Dhan accounts are the
-gateway to receiving government benefits directly (DBT).
-
-Saving and insurance: Small, regular savings build a safety net. Government micro-insurance and
-pension schemes for the poor include Pradhan Mantri Jeevan Jyoti Bima Yojana (life insurance),
-Pradhan Mantri Suraksha Bima Yojana (accident insurance) at very low annual premiums, and Atal
-Pension Yojana for old-age pension.
-
-Digital payments: UPI (Unified Payments Interface) lets people send and receive money instantly
-using a mobile phone, free of cost for most personal transactions. Always keep your UPI PIN and
-bank OTP secret. No genuine bank or government office will ever ask for your PIN, OTP, or full card
-details over phone or message.
-
-Avoiding fraud: Never share OTP, PIN or passwords. Be cautious of callers promising loans, prizes
-or scheme money in exchange for a fee or your bank details. Verify schemes only through official
-websites, banks, or the local government office. Report fraud to your bank immediately and to the
-cyber crime helpline 1930.`,
-  },
-  {
-    title: "Pradhan Mantri Kisan Maandhan Yojana (Farmer Pension)",
+    title: "PM-KUSUM Scheme (Solar Agricultural Pumps & Grid Solarization)",
     domain: "schemes",
-    source: "maandhan.in",
-    text: `The Pradhan Mantri Kisan Maandhan Yojana (PM-KMY) is a voluntary and contributory
-pension scheme for small and marginal farmers, launched in 2019. It provides social security in
-old age to farmers who own cultivable land up to 2 hectares.
+    source: "pmkusum.mnre.gov.in",
+    text: `Pradhan Mantri Kisan Urja Suraksha evam Utthaan Mahabhiyan (PM-KUSUM) enables farmers to
+install solar water pumps, solarize existing grid-connected agriculture pumps, and generate clean energy.
 
-Benefits: After attaining the age of 60 years, enrolled farmers receive a minimum assured monthly
-pension of Rs 3,000. In case of death of the pensioner, the spouse is entitled to receive 50% of
-the pension as a family pension.
+Components:
+- Component A: Setting up of 10,000 MW decentralized ground-mounted grid-connected solar power plants
+  (0.5 MW to 2 MW) on barren/fallow agricultural land by individual farmers, cooperatives, or FPOs.
+- Component B: Installation of standalone off-grid solar agriculture water pumps (up to 7.5 HP capacity).
+  Central government provides 30% subsidy, State government provides 30% to 60% subsidy, and the farmer
+  contributes only 10% to 40% of the total cost.
+- Component C: Solarisation of existing grid-connected agriculture pumps and feeder-level solarisation.
 
-Contribution: Farmers between 18 and 40 years of age can join. The monthly contribution ranges from
-about Rs 55 to Rs 200 depending on the age of entry — the younger the entry age, the lower the
-contribution. The Government of India contributes an equal amount to the farmer's pension account,
-making it a 50:50 co-contribution.
-
-Enrolment: Farmers can enrol at the nearest Common Service Centre (CSC) with their Aadhaar card and
-a savings/Jan Dhan bank account. Those already receiving PM-KISAN benefits can choose to allow their
-monthly contribution to be deducted directly from the PM-KISAN benefit, making enrolment easier. The
-scheme is administered by the Life Insurance Corporation (LIC) as the pension fund manager.`,
+Benefits: Day-time reliable irrigation power, elimination of diesel fuel expenditure, and earning extra
+income by selling surplus solar electricity back to the state power distribution DISCOM.
+Application: Apply via State Nodal Renewable Energy Agency portals (such as MEDA / Mahavitaran in Maharashtra).`,
   },
   {
-    title: "How to Read and Understand Government Circulars and Notices",
-    domain: "circular",
-    source: "VAANI Guidance",
-    text: `Government circulars, notifications and notices follow a common structure. Understanding
-this structure helps citizens act correctly and on time.
+    title: "Pradhan Mantri Krishi Sinchayee Yojana (PMKSY) - Per Drop More Crop",
+    domain: "agriculture",
+    source: "pmksy.gov.in",
+    text: `PMKSY focuses on expanding irrigable area ('Har Khet Ko Pani') and improving water use efficiency
+at the farm level through micro-irrigation systems under 'Per Drop More Crop' (PDMC).
 
-Key parts of a circular: (1) the issuing department or office name and address at the top; (2) a
-circular / notification number and date, which you should always quote in any follow-up; (3) the
-subject line summarising the topic; (4) references to earlier orders or acts; (5) the main body
-stating the decision, rule change, or instruction; (6) the effective date; (7) any last date for
-application or compliance; and (8) the signature and designation of the issuing authority.
-
-What to look for: Identify who the circular applies to (eligibility), what action is required, the
-deadline, and the documents or forms needed. Note any helpline numbers, office addresses, or portal
-links for submission. If the circular refers to an earlier order, that order usually contains the
-detailed rules.
-
-Practical tips: Keep a copy of the circular and note its number. Submit applications before the last
-date and keep an acknowledgement/receipt. If unsure, visit the concerned government office, the
-Common Service Centre, or the gram panchayat for help. Beware of anyone charging unofficial fees to
-'process' a benefit — most scheme applications are free or carry only a small official charge.`,
+Subsidies: Small and marginal farmers receive 55% subsidy on drip and sprinkler irrigation equipment;
+other farmers receive 45% subsidy. In several states, additional top-up subsidies are provided to reach
+up to 75%-80% total financial support.
+Benefits: 30% to 50% water savings, 20% to 30% reduction in electricity/fuel costs, balanced fertigation
+(liquid fertilizer application directly to roots), and 20% to 40% increase in crop productivity.
+How to apply: Through State Agriculture / Horticulture Department portals (e.g., MahaDBT in Maharashtra)
+submitting 7/12 land extract, 8-A holding, water source proof, electricity bill, and quotation.`,
   },
   {
-    title: "Frequently Asked Questions - VAANI and Government Services",
-    domain: "faq",
-    source: "VAANI FAQ",
-    text: `Q: What documents do I usually need for government schemes?
-A: Most agriculture and welfare schemes require an Aadhaar card, a bank account (preferably a Jan
-Dhan or DBT-enabled account linked to Aadhaar), and land records for land-based schemes. Keep a
-passport-size photograph handy. Ensure your name is spelt the same way across all documents.
+    title: "Soil Health Card & Paramparagat Krishi Vikas Yojana (PKVY)",
+    domain: "agriculture",
+    source: "soilhealth.dac.gov.in / pgsi-dac.gov.in",
+    text: `Soil Health Card (SHC) provides field-specific nutrient status covering 12 vital parameters:
+Macro-nutrients (Nitrogen N, Phosphorus P, Potassium K), Secondary nutrient (Sulphur S), Micronutrients
+(Zinc, Iron, Copper, Manganese, Boron), and Physical properties (pH, Electrical Conductivity EC, Organic Carbon OC).
+Issued every 2 years by Krishi Vigyan Kendras (KVK) and state testing labs with crop-wise dosage advice.
 
-Q: What is DBT?
-A: Direct Benefit Transfer (DBT) means scheme money is sent straight into your Aadhaar-linked bank
-account. To receive DBT, your bank account must be seeded (linked) with Aadhaar and active.
-
-Q: Where can I apply for schemes if I don't have internet at home?
-A: Visit the nearest Common Service Centre (CSC), your bank branch, the gram panchayat office, or
-the block/tehsil office. PACS in many villages also help with scheme applications.
-
-Q: How do I check if my application or instalment is approved?
-A: Most schemes have an online 'beneficiary status' or 'application status' check on their official
-portal. You can also ask at the CSC or the concerned office quoting your application number.
-
-Q: How do I avoid fraud?
-A: Never share your OTP, ATM PIN or bank password. No official will ask for these. Apply only
-through official portals or offices, and report suspicious calls to the cyber helpline 1930.
-
-Q: Can VAANI give me legal advice?
-A: VAANI explains schemes, rules and processes in simple language using verified documents, and
-always shows its sources. For binding legal or financial decisions, confirm with the concerned
-government office or a qualified professional.`,
+Paramparagat Krishi Vikas Yojana (PKVY) promotes chemical-free organic and natural farming through cluster
+approaches and Participatory Guarantee System (PGS) certification. Financial support of Rs 50,000 per
+hectare over 3 years is provided for organic inputs, vermicompost units, bio-fertilizers, and marketing.`,
   },
   {
-    title: "Crop Loan Waiver and Debt Relief - What Farmers Should Know",
+    title: "e-NAM (National Agriculture Market) & FPO Formation (10,000 FPOs)",
+    domain: "agriculture",
+    source: "enam.gov.in / sfacindia.com",
+    text: `e-NAM is a pan-India electronic trading portal connecting over 1,300 APMC mandis across India,
+enabling farmers to discover transparent prices and sell their agricultural produce to online buyers nationally.
+Features: Online assaying, e-bidding, digital warehouse receipt financing, and direct bank settlement.
+
+Formation and Promotion of 10,000 Farmer Producer Organisations (FPOs): Central sector scheme providing
+management financial support up to Rs 18 Lakh per FPO over 3 years, equity grant matching up to Rs 2,000
+per member (max Rs 15 Lakh per FPO), and credit guarantee cover up to Rs 2 Crore through NABARD/NCDC.`,
+  },
+  {
+    title: "Pradhan Mantri Matsya Sampada Yojana (PMMSY) & AHIDF",
+    domain: "schemes",
+    source: "pmmsy.dof.gov.in / dahd.nic.in",
+    text: `PMMSY is the flagship fisheries development scheme with an investment of over Rs 20,050 Crore.
+Provides 40% financial assistance for general beneficiaries and 60% for women, SC, and ST beneficiaries
+for setting up aquaculture ponds, recirculating aquaculture systems (RAS), biofloc units, fish hatcheries,
+refrigerated transport vans, and deep-sea fishing vessels.
+
+Animal Husbandry Infrastructure Development Fund (AHIDF): Provides 3% interest subvention and credit
+guarantee for setting up dairy processing plants, meat processing units, cattle feed factories, and
+veterinary vaccine manufacturing.`,
+  },
+
+  // --- 2. SOCIAL WELFARE, PENSIONS, FOOD SECURITY & HOUSING ---
+  {
+    title: "Pradhan Mantri Awas Yojana - Gramin (PMAY-G) & Urban (PMAY-U)",
+    domain: "schemes",
+    source: "pmayg.nic.in / pmayuclap.gov.in",
+    text: `PMAY-Gramin provides financial assistance to homeless rural families and those living in kutcha/dilapidated
+houses to construct a minimum 25 sq. metre pucca house with hygienic cooking space.
+
+Financial Assistance:
+- Plain areas: Rs 1,20,000 per unit.
+- Hilly/difficult/North-Eastern/IAP states: Rs 1,30,000 per unit.
+- Additional 90 to 95 person-days of unskilled labor wages under MGNREGA (approx Rs 25,000+).
+- Rs 12,000 additional financial assistance for toilet construction under Swachh Bharat Mission (Gramin).
+- Free LPG connection under PM Ujjwala Yojana and free electricity meter connection under Saubhagya.
+
+Selection: Based on Socio-Economic and Caste Census (SECC) and verified Awas+ survey list.
+Disbursement: In 3 to 4 geo-tagged milestone instalments (Foundation, Plinth, Lintel/Roof, Completion)
+directly into the woman head of household's bank account via DBT.`,
+  },
+  {
+    title: "Pradhan Mantri Garib Kalyan Anna Yojana (PMGKAY) - Food Security",
+    domain: "schemes",
+    source: "dfpd.gov.in / nfsa.gov.in",
+    text: `Under the National Food Security Act (NFSA) and PMGKAY, the Government of India provides FREE
+foodgrains (rice, wheat, coarse grains) to over 81.35 Crore beneficiaries across India through 2028.
+
+Entitlements:
+- Antyodaya Anna Yojana (AAY) poorest households: 35 kg of free foodgrains per family per month.
+- Priority Household (PHH) ration card holders: 5 kg of free foodgrains per person per month.
+- One Nation One Ration Card (ONORC): Beneficiaries and migrant workers can collect their subsidized/free
+  ration from ANY Fair Price Shop (FPS) across India using biometric Aadhaar authentication on e-POS devices.
+Toll-free National Food Helpline: 1967.`,
+  },
+  {
+    title: "National Social Assistance Programme (NSAP) & State Old Age / Widow Pensions",
+    domain: "schemes",
+    source: "nsap.nic.in",
+    text: `NSAP delivers monthly social pensions to impoverished elderly, widows, and persons with severe disabilities.
+
+Central Components:
+- Indira Gandhi National Old Age Pension Scheme (IGNOAPS): For BPL persons aged 60-79 years (Rs 200/mo central
+  + state contribution) and for 80+ years (Rs 500/mo central + state contribution). In states like Maharashtra
+  (Sanjay Gandhi Niradhar Yojana / Shravanbal Yojana), the total monthly pension is Rs 1,500 per month.
+- Indira Gandhi National Widow Pension Scheme (IGNWPS): Monthly pension for BPL widows aged 40-79 years.
+- Indira Gandhi National Disability Pension Scheme (IGNDPS): For BPL persons aged 18+ with 80%+ severe disability.
+- National Family Benefit Scheme (NFBS): One-time lumpsum grant of Rs 20,000 to a BPL family upon the death
+  of the primary breadwinner (aged 18-59).
+Application: Through the local Gram Panchayat, Tehsil / Talathi office, or State e-District / DBT portals.`,
+  },
+  {
+    title: "Pradhan Mantri Shram Yogi Maan-dhan (PM-SYM) & PM Kisan Maandhan",
+    domain: "schemes",
+    source: "maandhan.in / eshram.gov.in",
+    text: `Voluntary and contributory pension schemes for unorganized workers, daily wage laborers, rickshaw drivers,
+domestic workers, and small/marginal farmers with monthly income of Rs 15,000 or less.
+
+Benefits: Guaranteed assured lifelong monthly pension of Rs 3,000 after attaining 60 years of age.
+Family pension: 50% of pension to spouse upon beneficiary's demise.
+Contributions: 50:50 matching co-contribution between beneficiary and Central Government.
+Entry age 18 to 40 years; monthly contribution ranges from Rs 55 (at age 18) to Rs 200 (at age 40).
+Enrolment: Instant registration at any Common Service Centre (CSC) with Aadhaar and Jan Dhan/Savings Bank passbook.`,
+  },
+  {
+    title: "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+    domain: "schemes",
+    source: "nrega.nic.in",
+    text: `MGNREGA legally guarantees at least 100 days of wage employment in every financial year to every rural
+household whose adult members volunteer to do unskilled manual work.
+
+Key Provisions:
+- Legal Right to Work: Must be provided within 15 days of applying; otherwise, statutory unemployment allowance
+  is payable by the State Government.
+- Equal wages for men and women paid directly into bank/post office accounts via Aadhaar-Based Payment System (ABPS).
+- Worksite amenities: Crèche, drinking water, first aid, and shade must be provided.
+- Permissible Works: Water conservation, check dams, farm ponds, percolation tanks, rural roads, individual
+  land development for SC/ST/small farmers, compost pits, and cattle sheds.
+- Job Card: Issued free of cost by the local Gram Panchayat within 15 days of application with photos of adult members.`,
+  },
+
+  // --- 3. HEALTHCARE & MOTHER-CHILD WELFARE ---
+  {
+    title: "Ayushman Bharat PM-JAY & ABHA Health Account",
+    domain: "schemes",
+    source: "nha.gov.in / pmjay.gov.in",
+    text: `Ayushman Bharat Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) is the world's largest government-funded
+health assurance scheme, providing free secondary and tertiary hospitalization cover.
+
+Benefits:
+- Cashless and paperless inpatient hospitalization cover up to Rs 5,00,000 per family per year across 27,000+
+  empanelled public and private hospitals across India.
+- No cap on family size, age, or gender. Pre-existing diseases are covered from Day 1.
+- All senior citizens aged 70 years and above (Ayushman Vay Vandana Card) receive a distinct Rs 5,00,000
+  annual top-up health cover regardless of income.
+- Covers 1,949 medical packages including cardiac surgery, joint replacements, chemotherapy, ICU care,
+  medications, and 15 days post-discharge diagnostics.
+
+ABHA (Ayushman Bharat Health Account): A 14-digit digital health ID that securely links all your electronic
+medical records, lab tests, prescriptions, and discharge summaries across all clinics and hospitals.
+Toll-free 24x7 Helpline: 14555. Check eligibility at beneficiary.nha.gov.in with Aadhaar or Ration Card.`,
+  },
+  {
+    title: "Pradhan Mantri Matru Vandana Yojana (PMMVY) & Janani Suraksha Yojana (JSY)",
+    domain: "schemes",
+    source: "pmmvy.wcd.gov.in / nhm.gov.in",
+    text: `PMMVY provides direct maternity cash incentives to pregnant women and lactating mothers for health,
+nutrition, and compensation for wage loss during pregnancy and childbirth.
+
+Incentives:
+- First Child: Rs 5,000 in two instalments (Rs 3,000 upon early pregnancy registration & at least one ANC checkup;
+  Rs 2,000 upon child birth registration and first cycle of vaccinations).
+- Second Child (if female child): One-time incentive of Rs 6,000 upon institutional birth and complete immunization
+  to promote child sex ratio and prevent female feticide.
+
+Janani Suraksha Yojana (JSY): Additional cash assistance of Rs 1,400 (in rural areas) for institutional delivery
+in government or accredited private hospitals with free ambulance and diet support.
+Application: Through Anganwadi Centers, ASHA workers, or online at pmmvy.wcd.gov.in.`,
+  },
+  {
+    title: "Pradhan Mantri Bharatiya Janaushadhi Pariyojana (PMBJP)",
+    domain: "schemes",
+    source: "janaushadhi.gov.in",
+    text: `PMBJP delivers high-quality generic medicines, surgical instruments, and nutraceuticals at prices
+50% to 90% cheaper than branded market equivalents through over 10,000+ Jan Aushadhi Kendras.
+
+Features:
+- Over 2,000 generic medicines and 300 surgical items covering cardiovascular, diabetes, cancer, antibiotics,
+  vitamins, pain relief, and chronic illnesses.
+- Suvidha Oxo-biodegradable Sanitary Napkins available at just Rs 1 per pad for menstrual hygiene.
+- Any individual pharmacist, NGO, cooperative society, or PACS can apply to open a Jan Aushadhi Kendra with
+  government incentives up to Rs 5 Lakh for setup and sales margin.`,
+  },
+
+  // --- 4. WOMEN EMPOWERMENT, LIVELIHOODS & SHGs ---
+  {
+    title: "Deendayal Antyodaya Yojana - NRLM & Lakhpati Didi Initiative",
+    domain: "schemes",
+    source: "aajeevika.gov.in / nrlm.gov.in",
+    text: `DAY-NRLM (National Rural Livelihoods Mission) mobilizes rural women into Self-Help Groups (SHGs),
+Village Organizations (VO), and Cluster Level Federations (CLF) to achieve sustainable livelihoods and financial independence.
+
+Key Supports:
+- Revolving Fund (RF): Rs 20,000 to Rs 30,000 per eligible SHG.
+- Community Investment Fund (CIF): Up to Rs 1.5 Lakh per SHG for initiating collective micro-enterprises.
+- Collateral-Free Bank Loans: SHGs can access collateral-free loans up to Rs 20 Lakh with interest subvention
+  reducing effective interest to 7% per annum.
+- Lakhpati Didi Scheme: National initiative to enable over 3 Crore rural women SHG members to earn a sustainable
+  annual income of at least Rs 1 Lakh through skills in agro-processing, livestock, drone operation (Namo Drone Didi),
+  solar assembly, tailoring, and micro-enterprises.`,
+  },
+  {
+    title: "Pradhan Mantri Ujjwala Yojana (PMUY) - Free LPG Gas",
+    domain: "schemes",
+    source: "pmuy.gov.in",
+    text: `PMUY provides deposit-free LPG gas connections to women belonging to poor households to safeguard health
+from hazardous smoke from biomass burning.
+
+Benefits:
+- Free LPG connection including security deposit for cylinder, regulator, safety hose pipe, domestic gas passbook,
+  and installation charges paid by the Government of India.
+- Free first 14.2 kg LPG cylinder refill and hotplate/gas stove.
+- Targeted subsidy of Rs 300 per refill directly credited into the woman beneficiary's bank account for up to 12 refills/year.
+Eligibility: Adult woman from BPL / SC / ST / PMAY / Antyodaya / Forest dweller / Most backward class households
+without an existing LPG connection. Apply at any Indane, Bharatgas, or HP Gas distributor.`,
+  },
+  {
+    title: "Sukanya Samriddhi Yojana (SSY) & Mahila Samman Savings Certificate",
     domain: "finance",
-    source: "VAANI Guidance",
-    text: `From time to time, state governments announce crop loan waiver or debt relief schemes
-to support farmers facing distress. Because the terms differ by state and by scheme, farmers should
-always verify the details of the specific scheme announced in their state.
+    source: "indiapost.gov.in / rbi.org.in",
+    text: `Government-backed high-yield small savings schemes for girls and women.
 
-Common features to check: the cut-off date of loans eligible for waiver, the maximum loan amount
-covered, the types of loans included (usually short-term crop loans from cooperative and public
-sector banks), whether the account must be a standard or overdue account, and the last date to
-complete verification (often Aadhaar-based).
+Sukanya Samriddhi Yojana (SSY):
+- Opened by parents for a girl child below 10 years of age at any Post Office or commercial bank.
+- Highest government interest rate (currently ~8.2% per annum compounded annually) with full Section 80C tax deduction
+  and tax-free maturity interest.
+- Minimum annual deposit Rs 250 (max Rs 1.5 Lakh/year). Matures after 21 years with 50% partial withdrawal allowed
+  after girl turns 18 for higher education.
 
-Steps for farmers: Confirm eligibility through the official scheme portal or your bank/PACS. Complete
-any required Aadhaar authentication. Keep your loan account passbook and land records ready. Obtain
-a written acknowledgement once your loan is included in the waiver list.
+Mahila Samman Savings Certificate:
+- 2-year deposit scheme for women and girls offering guaranteed 7.5% per annum fixed interest with partial withdrawal facility.`,
+  },
 
-Important caution: A loan waiver applies only to eligible existing loans as defined by the scheme; it
-does not mean all future loans are free. Continue to repay loans that are not covered to keep your
-credit record and Kisan Credit Card benefits intact. Beware of agents who demand money to 'get your
-name added' to a waiver list — inclusion is based on official records, not on payment.`,
+  // --- 5. COOPERATIVES, PACS & RURAL GOVERNANCE ---
+  {
+    title: "Primary Agricultural Credit Societies (PACS) & Model Bye-Laws",
+    domain: "pacs",
+    source: "Ministry of Cooperation (cooperation.gov.in)",
+    text: `PACS are village-level cooperative credit institutions serving as the cornerstone of rural India's economy.
+Governed by State Cooperative Societies Acts and guided by the Ministry of Cooperation's Model Bye-Laws.
+
+Key Transformations:
+- National ERP Computerisation: Over 63,000 PACS digitized on a unified cloud platform linked to NABARD, DCCBs,
+  and StCBs for real-time online accounting, transparency, and instant credit delivery.
+- Multi-Purpose Service Hubs: PACS now operate Common Service Centres (CSCs offering 300+ e-governance services),
+  PM Kisan Samruddhi Kendras (fertilizer, seed, soil testing), Jan Aushadhi Kendras, LPG cylinder distribution,
+  petrol pumps, custom hiring centres for farm machinery, and decentralized grain storage facilities.
+Membership: Any rural resident can become a member by purchasing shares with one-member-one-vote democratic rights.`,
+  },
+  {
+    title: "Cooperative Societies Act - Governance, Elections & Member Rights",
+    domain: "cooperative",
+    source: "cooperation.gov.in / Cooperative Acts",
+    text: `Cooperative principles: Voluntary and open membership, democratic member control, member economic participation,
+autonomy, continuous education, and community concern (97th Constitutional Amendment).
+
+Key Legal Rights & Protocols:
+- Right to Vote: Every active member has one vote regardless of share capital.
+- Right to Information & Audit: Right to inspect audited balance sheets, profit-loss accounts, and voter rolls.
+- Managing Committee Elections: Conducted democratically every 5 years by the State Cooperative Election Authority.
+- Dispute Redressal: Cooperative disputes (elections, recovery, management) are adjudicated through the Cooperative Court /
+  Registrar of Cooperative Societies (RCS), rather than standard civil courts.
+- Dividend & Reserve Fund: Minimum 25% of net profits must be transferred to the statutory Reserve Fund before
+  declaring dividends to members.`,
+  },
+
+  // --- 6. MSME, ENTREPRENEURSHIP, SKILLS & BUSINESS LOANS ---
+  {
+    title: "PM Mudra Yojana (PMMY) - Collateral-Free Business Loans",
+    domain: "finance",
+    source: "mudra.org.in",
+    text: `Pradhan Mantri MUDRA Yojana delivers collateral-free loans up to Rs 20 Lakh to non-corporate, non-farm
+micro and small enterprises (shops, artisans, food processing, transport, small manufacturing).
+
+Categories:
+1. Shishu: Loans up to Rs 50,000 (for new micro-startups and street vendors).
+2. Kishore: Loans from Rs 50,001 to Rs 5 Lakh (for equipment purchase and business expansion).
+3. Tarun: Loans from Rs 5 Lakh to Rs 10 Lakh.
+4. Tarun Plus: Loans up to Rs 20 Lakh for entrepreneurs who have successfully repaid previous Tarun loans.
+Features: Zero processing fee for Shishu/Kishore, no collateral security, Mudra Debit Card for working capital.
+Apply at any public sector bank, private bank, RRB, microfinance institution, or via udyamimitra.in.`,
+  },
+  {
+    title: "PM Vishwakarma Scheme - Traditional Artisans & Craftspeople",
+    domain: "schemes",
+    source: "pmvishwakarma.gov.in",
+    text: `Central sector scheme providing holistic end-to-end support to traditional artisans and craftspeople
+working with hands and tools across 18 designated trades (Carpenters, Blacksmiths, Potters, Sculptors, Cobblers,
+Masons, Basket/Mat weavers, Tailors, Barbers, Washermen, etc.).
+
+Benefits:
+- Recognition: PM Vishwakarma Certificate and ID Card.
+- Skill Training: 5-7 days basic training and 15+ days advanced training with a daily stipend of Rs 500/day.
+- Toolkit Incentive: Modern digital toolkit grant of Rs 15,000 via e-RUPI voucher.
+- Subsidised Collateral-Free Loans: Enterprise development loans up to Rs 3 Lakh in two tranches (Tranche 1:
+  Rs 1 Lakh for 18 months; Tranche 2: Rs 2 Lakh for 30 months) at a concessional interest rate of just 5%
+  (with 8% interest subvention paid by GoI).
+- Digital Transaction Incentive: Rs 1 per digital transaction (up to 100 transactions per month).
+Apply free at any Common Service Centre (CSC).`,
+  },
+  {
+    title: "PM Employment Generation Programme (PMEGP) & Stand-Up India",
+    domain: "finance",
+    source: "kviconline.gov.in / standupmitra.in",
+    text: `PMEGP is a major credit-linked subsidy program administered by KVIC to establish micro-enterprises in rural and urban areas.
+
+Subsidies:
+- Manufacturing Sector: Maximum project cost up to Rs 50 Lakh.
+- Service Sector: Maximum project cost up to Rs 20 Lakh.
+- Margin Money Subsidy: In rural areas, 25% subsidy for general category and 35% subsidy for special categories
+  (SC, ST, OBC, Women, Ex-servicemen, PH, Minorities). Beneficiary contribution is only 5% to 10%.
+- Upgradation of existing PMEGP units: Second loan up to Rs 1 Crore (manufacturing) with 15% to 20% subsidy.
+
+Stand-Up India Scheme: Bank loans between Rs 10 Lakh and Rs 1 Crore to at least one SC/ST borrower and at least
+one woman borrower per bank branch for setting up greenfield manufacturing, service, or trading enterprises.`,
+  },
+  {
+    title: "PM SVANidhi Scheme - Street Vendors Micro-Credit",
+    domain: "schemes",
+    source: "pmsvanidhi.mohua.gov.in",
+    text: `Special micro-credit facility for urban, peri-urban, and rural street vendors to resume and expand livelihoods.
+
+Loan Tranches:
+1. 1st Tranche: Working capital loan up to Rs 10,000 (repayable in 12 months).
+2. 2nd Tranche: Enhanced loan up to Rs 20,000 upon timely repayment of first loan.
+3. 3rd Tranche: Up to Rs 50,000 with collateral-free terms.
+Interest Subvention: 7% interest subsidy per annum credited directly to bank account on timely repayment.
+Cashback Incentives: Up to Rs 1,200 per year for adopting digital QR code transactions.`,
+  },
+
+  // --- 7. FINANCIAL SECURITY, INSURANCE & CITIZEN HELPLINES ---
+  {
+    title: "PMJJBY, PMSBY & Atal Pension Yojana (APY) - Social Security Trinity",
+    domain: "finance",
+    source: "financialservices.gov.in / pfrda.org.in",
+    text: `Low-cost government social security micro-insurance and pension schemes:
+
+1. Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY):
+   - Pure term life insurance cover of Rs 2,00,000 for death due to any cause.
+   - Age eligibility: 18 to 50 years with a bank/post office account.
+   - Annual premium: Rs 436 per year (auto-debited from savings account).
+
+2. Pradhan Mantri Suraksha Bima Yojana (PMSBY):
+   - Accidental death and full permanent disability cover of Rs 2,00,000 (Rs 1,00,000 for partial disability).
+   - Age eligibility: 18 to 70 years.
+   - Annual premium: Just Rs 20 per year.
+
+3. Atal Pension Yojana (APY):
+   - Guaranteed lifelong monthly pension of Rs 1,000, Rs 2,000, Rs 3,000, Rs 4,000, or Rs 5,000 starting from age 60.
+   - Open to all Indian citizens aged 18 to 40 years (non-taxpayers).
+   - Same pension continues to spouse upon subscriber's death; full corpus returned to nominee.`,
+  },
+  {
+    title: "Essential Citizen Helplines & Consumer / Cyber Fraud Protection",
+    domain: "faq",
+    source: "mha.gov.in / consumerhelpline.gov.in",
+    text: `Emergency Government Helplines across India:
+- National Emergency Number (Police / Fire / Ambulance): 112
+- Cyber Crime Financial Fraud Helpline: 1930 (Report within golden hour at cybercrime.gov.in to freeze stolen funds)
+- Kisan Call Centre (Agriculture / Crops / Diseases): 1800-180-1551 (Toll-Free, 6 AM to 10 PM daily in all Indian languages)
+- National Consumer Helpline (Fraud, disputes, complaints): 1915 or SMS 8800001915
+- Women Helpline (All-India 24x7 Domestic & Distress): 181
+- Childline (Child protection & rescue): 1098
+- Senior Citizen National Helpline (Elder Line): 14567
+- Ayushman Bharat PM-JAY Hospitalization Helpline: 14555
+- PM-KISAN Scheme Official Helpline: 155261 / 011-24300606
+- PMFBY Crop Insurance Loss Claim Helpline: 14447.
+
+Safety Rule: Never share 4/6-digit UPI PINs, Aadhaar OTPs, or CVVs. Government offices never charge processing fees via WhatsApp.`,
   },
 ];

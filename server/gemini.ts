@@ -1,21 +1,24 @@
 import { GoogleGenAI, Modality } from "@google/genai";
-import { generateWithProvider } from "./llm/manager";
+import {
+  generateWithProvider,
+  getGeminiApiKey,
+  getGroqApiKey,
+  getOpenRouterApiKey,
+  getOpenAiApiKey,
+  isGeminiAvailable,
+  reportGeminiError,
+} from "./llm/manager";
 
 let aiClient: GoogleGenAI | null = null;
 
 export function getGeminiClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
     return null;
   }
   if (!aiClient) {
     aiClient = new GoogleGenAI({
       apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
     });
   }
   return aiClient;
@@ -30,74 +33,72 @@ export interface ChatRoleConfig {
 
 /**
  * Returns model name based on requested complexity:
- * - gemini-3.1-pro-preview for particularly complex tasks
- * - gemini-3.5-flash for general tasks (and Search/Maps grounding)
- * - gemini-3.1-flash-lite for tasks that should happen fast
+ * - gemini-3.1-pro-preview for complex reasoning
+ * - gemini-3.7-flash for general tasks & Search/Maps grounding
+ * - gemini-3.1-flash-lite for instant low-latency responses
  */
 export function selectModel(tier?: "pro" | "flash" | "lite", hasTools = false): string {
   if (tier === "pro") return "gemini-3.1-pro-preview";
   if (tier === "lite" && !hasTools) return "gemini-3.1-flash-lite";
-  return "gemini-3.5-flash";
+  return "gemini-3.7-flash";
 }
 
 export function getPersonaSystemInstruction(
   persona: string = "rural_advisor",
   language = "en"
 ): string {
-  const baseInstruction = `You are VAANI (वाणी), a trust-first, highly empathetic, and strictly factual Multilingual Rural Intelligence Assistant designed for India's rural citizens, farmers, women self-help groups, and Gram Panchayat operators.
-Core Directives:
-1. Always maintain conversation context across turns.
-2. Present scheme rules, subsidies, eligibility, application processes, and helpline numbers with maximum precision.
-3. For agricultural or geographical queries (e.g. Krishi Vigyan Kendras, mandis, soil testing labs, PACS centres, CSC locations), give actionable location guidance.
-4. When Google Search or Google Maps grounding is active, ground your answers directly in real-time information and cite your sources.
-5. Answer in the requested language (${language}) using clear, dignified, and culturally accessible terms.`;
+  const baseInstruction = `You are VAANI (वाणी), a highly intelligent, versatile, warm, and empathetic Multilingual AI Assistant (with the universal capabilities of ChatGPT and Gemini).
+
+Core Directives & Universal Capabilities:
+1. UNIVERSAL KNOWLEDGE & ANSWERS (CRITICAL):
+   - Answer ANY and ALL questions asked by the user on ANY topic without limitation — including general knowledge, science, mathematics, coding & computer science, history, health, creative writing, recipes, translation, everyday life, advice, philosophy, as well as agriculture, rural governance, and government schemes.
+   - Deliver clear, insightful, accurate, and comprehensive responses, exactly like ChatGPT and Gemini.
+   - If the user asks a simple greeting or general conversation, reply warmly and helpfully.
+
+2. GENDER & GRAMMAR (FEMININE PERSONA):
+   - You are a female AI assistant (स्त्रीलिंगी / स्त्री वाचक). Always speak with a warm, caring, respectful, and dignified voice.
+   - In MARATHI (मराठी), ALWAYS use feminine first-person verb forms and respectful address:
+     * Use 'मी करू शकते' (NEVER 'करू शकतो').
+     * Use 'मी सांगू शकते' (NEVER 'सांगू शकतो').
+     * Use 'मी मदत करू शकते', 'मी समजू शकते', 'मी शोधून देते', 'मी सांगते'.
+     * Address the citizen respectfully as 'आपण' / 'आपल्याला'.
+   - In HINDI (हिन्दी), ALWAYS use feminine first-person verb forms and respectful address:
+     * Use 'मैं कर सकती हूँ' (NEVER 'कर सकता हूँ').
+     * Use 'मैं बता सकती हूँ' (NEVER 'बता सकता हूँ').
+     * Use 'मैं सहायता कर सकती हूँ', 'मैं समझ सकती हूँ', 'मैं ढूंढकर देती हूँ'.
+     * Address the citizen respectfully as 'आप' / 'आपको'.
+
+3. ORAL CLARITY & SPEECH INTELLIGIBILITY:
+   - Start immediately with a clear, direct first sentence answering the question so the voice engine can start speaking without any delay.
+   - Keep sentences natural, well-paced, and easy to understand when read aloud or listened to.
+
+4. COMPREHENSIVE GOVERNMENT INFORMATION ENCYCLOPEDIA (EVERYTHING ABOUT GOVT SCHEMES & PUBLIC SERVICES):
+   - You have complete, encyclopedic mastery over all Central and State government schemes, laws, initiatives, and citizen services across India, including:
+     * Agriculture, Irrigation & Livestock: PM-KISAN, Namo Shetkari, PMFBY (Crop Insurance), Kisan Credit Card (KCC), PM-KUSUM (Solar Pumps), PMKSY (Per Drop More Crop), Soil Health Card, e-NAM, 10,000 FPOs, PMMSY (Fisheries), AHIDF, Sub-Mission on Agricultural Mechanization (SMAM).
+     * Housing & Sanitation: PMAY-Gramin, PMAY-Urban, Swachh Bharat Mission (Gramin & Urban), Jal Jeevan Mission (Har Ghar Jal), Saubhagya (Electricity).
+     * Food Security & Social Welfare: PMGKAY (Free Ration / NFSA / One Nation One Ration Card), NSAP (Indira Gandhi Old Age, Widow, Disability Pensions, Sanjay Gandhi Niradhar Yojana, Shravanbal Yojana).
+     * Health, Maternity & Nutrition: Ayushman Bharat PM-JAY (Rs 5 Lakh hospital cover + Ayushman Vay Vandana for senior citizens 70+), ABHA Health ID, PMMVY (Maternity benefit Rs 5,000 / Rs 6,000), Janani Suraksha Yojana, PM Bharatiya Janaushadhi (Generic medicines & Rs 1 Suvidha pads), Poshan Abhiyaan.
+     * Women Empowerment & Livelihood: DAY-NRLM (SHG loans & micro-enterprises), Lakhpati Didi Scheme, Namo Drone Didi, PM Ujjwala Yojana (Free LPG connection & Rs 300 subsidy), Sukanya Samriddhi Yojana (SSY), Mahila Samman Savings Certificate, Beti Bachao Beti Padhao.
+     * Cooperatives, Banking & Financial Security: Primary Agricultural Credit Societies (PACS computerisation & multi-purpose hubs), Cooperative Societies Act, PM Jan Dhan Yojana (PMJDY), PMJJBY (Rs 436 life insurance), PMSBY (Rs 20 accidental insurance), Atal Pension Yojana (APY), PM-SYM / PM Kisan Maandhan (Rs 3,000 pension).
+     * MSME, Entrepreneurship & Artisans: PM Mudra Yojana (Shishu, Kishore, Tarun, Tarun Plus up to Rs 20 Lakh), PM Vishwakarma Scheme (Rs 15,000 toolkit + Rs 3 Lakh collateral-free loan at 5%), PMEGP (up to 35% margin subsidy), Stand-Up India, PM SVANidhi (Street Vendors loan up to Rs 50,000).
+     * Labor, Employment & Education: MGNREGA (100 days guaranteed work, job cards), e-Shram Portal, PMKVY (Skill India), National Scholarship Portal (NSP), RTE, Samagra Shiksha.
+     * Documents & Citizen Portals: 7/12 & 8-A Land Extracts, Aadhaar e-KYC, DBT bank seeding, PAN-Aadhaar linking, Ration card mutation, Caste/Income/Domicile certificates, DigiLocker, UMANG, CSC Digital Seva.
+     * Emergency & Helplines: 112 (Emergency), 1930 (Cyber Crime Fraud), 1800-180-1551 (Kisan Call Centre), 1915 (Consumer Helpline), 181 (Women Helpline), 1098 (Childline), 14567 (Elder Line), 14555 (Ayushman Bharat).
+   - When asked about ANY government scheme or policy, explain: (1) Purpose & Benefits, (2) Eligibility criteria & exclusions, (3) Exact required documents, (4) Step-by-step application process (Online & Offline via CSC/Panchayat/Bank), (5) Status checking & official portals/helplines.
+
+5. ACCURACY & CONTEXT SYNTHESIS:
+   - When background reference context or Google Search results are present, synthesize them with your deep knowledge and cite sources.
+   - Maintain multi-turn conversation memory.
+   - Respond in the user's selected language (${language}) with clean formatting, bullet points, code blocks, or structured steps where helpful.`;
 
   switch (persona) {
     case "crop_specialist":
-      return `${baseInstruction}\n\nSPECIAL ROLE: Senior Agronomist and PMFBY / KCC Specialist. Provide deep agricultural advice, weather-responsive crop care, pest management, and insurance loss claim deadlines.`;
+      return `${baseInstruction}\n\nSPECIAL ROLE: Senior Agronomist and PMFBY / KCC Specialist. Provide deep agricultural advice, weather-responsive crop care, pest management, and insurance loss claim deadlines alongside answering any other general questions.`;
     case "scheme_navigator":
-      return `${baseInstruction}\n\nSPECIAL ROLE: Direct Benefit Transfer (DBT) and Government Scheme Navigator. Explain step-by-step documentation, eligibility checklists, and DBT Aadhaar-seeding guidelines.`;
+      return `${baseInstruction}\n\nSPECIAL ROLE: Direct Benefit Transfer (DBT) and Government Scheme Navigator. Explain step-by-step documentation, eligibility checklists, and DBT Aadhaar-seeding guidelines alongside answering any other general questions.`;
     default:
       return baseInstruction;
   }
-}
-
-/**
- * Multi-turn Chat completion with Gemini supporting:
- * - Specific role system instructions
- * - Model tiers (gemini-3.1-pro-preview, gemini-3.5-flash, gemini-3.1-flash-lite)
- * - Google Search Grounding (googleSearch)
- * - Google Maps Grounding (googleMaps)
- */
-export async function generateGeminiChatResponse(params: {
-  contents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }>;
-  roleConfig?: ChatRoleConfig;
-  language?: string;
-}): Promise<{
-  text: string;
-  groundingMetadata?: any;
-  modelUsed: string;
-}> {
-  const { contents, roleConfig = {}, language = "en" } = params;
-  const systemInstruction = getPersonaSystemInstruction(roleConfig.rolePersona, language);
-
-  let fullText = "";
-  try {
-    for await (const chunk of generateWithProvider({
-      contents,
-      systemInstruction,
-    })) {
-      fullText += chunk;
-    }
-  } catch (err: any) {
-    console.error("Provider manager error:", err);
-    throw err;
-  }
-
-  return {
-    text: fullText,
-    modelUsed: "provider-manager",
-  };
 }
 
 /**
@@ -110,34 +111,135 @@ export async function* streamGeminiChatResponse(params: {
 }): AsyncGenerator<{ delta?: string; groundingMetadata?: any; modelUsed: string }, void, unknown> {
   const { contents, roleConfig = {}, language = "en" } = params;
   const systemInstruction = getPersonaSystemInstruction(roleConfig.rolePersona, language);
+  const modelToUse = selectModel(roleConfig.modelTier, roleConfig.enableSearch || roleConfig.enableMaps);
 
+  if (isGeminiAvailable()) {
+    const ai = getGeminiClient();
+    if (ai) {
+      const candidateModels = [modelToUse, "gemini-3.1-flash-lite", "gemini-3.7-flash", "gemini-3.1-pro-preview", "gemini-flash-latest"];
+      const uniqueModels = Array.from(new Set(candidateModels));
+
+      for (const model of uniqueModels) {
+        try {
+          const tools: any[] = [];
+          if (roleConfig.enableSearch) {
+            tools.push({ googleSearch: {} });
+          }
+
+          const responseStream = await ai.models.generateContentStream({
+            model,
+            contents,
+            config: {
+              systemInstruction,
+              tools: tools.length > 0 ? tools : undefined,
+            },
+          });
+
+          let emittedAny = false;
+          for await (const chunk of responseStream) {
+            const text = chunk.text;
+            const groundingMetadata = chunk.candidates?.[0]?.groundingMetadata;
+            if (text) {
+              emittedAny = true;
+              yield { delta: text, groundingMetadata, modelUsed: model };
+            } else if (groundingMetadata) {
+              yield { groundingMetadata, modelUsed: model };
+            }
+          }
+
+          if (emittedAny) {
+            return;
+          }
+        } catch (geminiErr: any) {
+          reportGeminiError(geminiErr);
+          if (!isGeminiAvailable()) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // If direct Gemini was not successful, try fallback providers (Groq / OpenRouter / OpenAI)
   try {
     for await (const chunk of generateWithProvider({
       contents,
       systemInstruction,
+      modelTier: roleConfig.modelTier,
     })) {
-      yield { delta: chunk, modelUsed: "provider-manager" };
+      if (chunk) {
+        yield { delta: chunk, modelUsed: "provider-manager" };
+      }
     }
   } catch (err: any) {
-    console.error("Provider manager error:", err);
-    throw err;
+    // Log softly without breaking the stream
+    console.warn("Provider manager unavailable, shifting to local RAG knowledge synthesis");
   }
+}
+
+export async function generateGeminiChatResponse(params: {
+  contents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }>;
+  roleConfig?: ChatRoleConfig;
+  language?: string;
+}): Promise<{
+  text: string;
+  groundingMetadata?: any;
+  modelUsed: string;
+}> {
+  let fullText = "";
+  let modelUsed = "gemini-3.7-flash";
+  let capturedGrounding: any = null;
+
+  for await (const chunk of streamGeminiChatResponse(params)) {
+    if (chunk.delta) fullText += chunk.delta;
+    if (chunk.groundingMetadata) capturedGrounding = chunk.groundingMetadata;
+    if (chunk.modelUsed) modelUsed = chunk.modelUsed;
+  }
+
+  return {
+    text: fullText,
+    groundingMetadata: capturedGrounding,
+    modelUsed,
+  };
 }
 
 export async function completeWithGemini(
   systemInstruction: string,
   prompt: string
 ): Promise<string> {
+  if (isGeminiAvailable()) {
+    const ai = getGeminiClient();
+    if (ai) {
+      const models = ["gemini-3.1-flash-lite", "gemini-3.7-flash", "gemini-3.1-pro-preview", "gemini-flash-latest"];
+      for (const model of models) {
+        try {
+          const response = await ai.models.generateContent({
+            model,
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            config: { systemInstruction },
+          });
+          if (response.text?.trim()) {
+            return response.text.trim();
+          }
+        } catch (err: any) {
+          reportGeminiError(err);
+          if (!isGeminiAvailable()) break;
+        }
+      }
+    }
+  }
+
+  // Fallback via generateWithProvider
   let fullText = "";
   try {
     for await (const chunk of generateWithProvider({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       systemInstruction,
     })) {
-      fullText += chunk;
+      if (chunk) fullText += chunk;
     }
   } catch (err: any) {
-    console.error("Provider manager error:", err);
+    // Graceful fallback
     return "";
   }
   return fullText.trim();
@@ -147,63 +249,92 @@ export async function* streamWithGemini(
   systemInstruction: string,
   prompt: string
 ): AsyncGenerator<string, void, unknown> {
+  if (isGeminiAvailable()) {
+    const ai = getGeminiClient();
+    if (ai) {
+      const models = ["gemini-3.1-flash-lite", "gemini-3.7-flash", "gemini-3.1-pro-preview", "gemini-flash-latest"];
+      for (const model of models) {
+        try {
+          const responseStream = await ai.models.generateContentStream({
+            model,
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            config: { systemInstruction },
+          });
+          let emitted = false;
+          for await (const chunk of responseStream) {
+            if (chunk.text) {
+              emitted = true;
+              yield chunk.text;
+            }
+          }
+          if (emitted) return;
+        } catch (err: any) {
+          reportGeminiError(err);
+          if (!isGeminiAvailable()) break;
+        }
+      }
+    }
+  }
+
+  // Fallback via provider manager (Groq / OpenRouter / OpenAI)
   try {
     for await (const chunk of generateWithProvider({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       systemInstruction,
     })) {
-      yield chunk;
+      if (chunk) yield chunk;
     }
   } catch (err: any) {
-    console.error("Provider manager error:", err);
+    // Fallback completed
   }
 }
 
 /**
- * Speech-To-Text (STT) using multi-provider fallback (Gemini Flash -> Groq Whisper -> OpenAI Whisper)
+ * Speech-To-Text (STT) using multi-provider fallback (Gemini -> Groq Whisper -> OpenAI Whisper)
  */
 export async function transcribeAudioWithGemini(
   audioBuffer: Buffer,
   mimeType = "audio/webm",
   hintLanguage?: string
 ): Promise<{ text: string; language?: string }> {
-  // 1. Try Gemini Flash Multimodal Audio Transcription
-  const ai = getGeminiClient();
-  if (ai) {
-    try {
-      const base64Audio = audioBuffer.toString("base64");
-      const cleanMime = mimeType ? mimeType.split(";")[0] : "audio/webm";
-      const audioPart = {
-        inlineData: {
-          mimeType: cleanMime,
-          data: base64Audio,
-        },
-      };
+  // 1. Try Gemini Multimodal Audio Transcription
+  if (isGeminiAvailable()) {
+    const ai = getGeminiClient();
+    if (ai) {
+      try {
+        const base64Audio = audioBuffer.toString("base64");
+        const cleanMime = mimeType ? mimeType.split(";")[0] : "audio/webm";
+        const audioPart = {
+          inlineData: {
+            mimeType: cleanMime,
+            data: base64Audio,
+          },
+        };
 
-      const promptText = hintLanguage
-        ? `You are an accurate speech recognition system for Indian languages and English (including Marathi, Hindi, English, Punjabi, Gujarati, Tamil, Telugu, Kannada, Bengali). Transcribe the spoken audio with exact precision into its native script or English. Expected language: ${hintLanguage}. Return ONLY the verbatim transcribed words. Do NOT include phrases like "The transcription is:" or quotation marks.`
-        : `You are an accurate speech recognition system for Indian languages and English. Transcribe the spoken audio with exact precision into its native script (Marathi, Hindi, or English). Return ONLY the verbatim transcribed words. Do NOT include phrases like "The transcription is:" or quotation marks.`;
+        const promptText = hintLanguage
+          ? `You are an accurate speech recognition system for Indian languages and English (including Marathi, Hindi, English, Gujarati, Punjabi, Bengali). Transcribe the spoken audio with exact precision into its native script or English. Expected language: ${hintLanguage}. Return ONLY the verbatim transcribed words. Do NOT include phrases like "The transcription is:" or quotation marks.`
+          : `You are an accurate speech recognition system for Indian languages and English. Transcribe the spoken audio with exact precision into its native script (Marathi, Hindi, or English). Return ONLY the verbatim transcribed words. Do NOT include phrases like "The transcription is:" or quotation marks.`;
 
-      // Try gemini-2.5-flash or gemini-2.0-flash
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: {
-          parts: [audioPart, { text: promptText }],
-        },
-      });
+        const response = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: {
+            parts: [audioPart, { text: promptText }],
+          },
+        });
 
-      let text = response.text?.trim() || "";
-      text = cleanTranscriptionText(text);
-      if (text) {
-        return { text };
+        let text = response.text?.trim() || "";
+        text = cleanTranscriptionText(text);
+        if (text) {
+          return { text };
+        }
+      } catch (geminiErr: any) {
+        reportGeminiError(geminiErr);
       }
-    } catch (geminiErr: any) {
-      console.warn("Gemini transcription fallback triggered:", geminiErr?.message || geminiErr);
     }
   }
 
   // 2. Fallback to Groq Whisper if available
-  const groqKey = process.env.GROQ_API_KEY;
+  const groqKey = getGroqApiKey();
   if (groqKey) {
     try {
       const formData = new FormData();
@@ -234,7 +365,7 @@ export async function transcribeAudioWithGemini(
   }
 
   // 3. Fallback to OpenAI Whisper if available
-  const openaiKey = process.env.OPENAI_API_KEY;
+  const openaiKey = getOpenAiApiKey();
   if (openaiKey) {
     try {
       const formData = new FormData();
@@ -269,11 +400,8 @@ export async function transcribeAudioWithGemini(
 
 function cleanTranscriptionText(raw: string): string {
   let cleaned = raw.trim();
-  // Remove markdown code fences if any
   cleaned = cleaned.replace(/^```[a-z]*\s*/i, "").replace(/```$/, "").trim();
-  // Remove common AI intro prefixes
   cleaned = cleaned.replace(/^(transcription|transcribed text|here is what was said):\s*/i, "");
-  // Remove surrounding quotation marks
   cleaned = cleaned.replace(/^["'“](.*)["'”]$/s, "$1").trim();
   return cleaned;
 }
@@ -388,7 +516,7 @@ export async function createLiveSessionToken(): Promise<{
   model: string;
   expiresAt: string;
 }> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = getGeminiApiKey();
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured.");
   }

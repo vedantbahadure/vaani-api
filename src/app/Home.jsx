@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, MessageCircle, ShieldCheck, FileCheck, Cpu } from "lucide-react";
 import { Orb } from "../components/Orb";
 import { EligibilityWizard } from "../components/EligibilityWizard";
 import { useLang } from "../lib/contexts";
@@ -37,6 +37,20 @@ export default function Home() {
             <button onClick={() => navigate("/app/chat")} data-testid="start-chat-cta"
               className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-6 py-3 font-medium transition-transform duration-300 hover:scale-[1.03] active:scale-95">
               <MessageCircle className="w-4.5 h-4.5" /> {t(lang, "ask_anything")} <ArrowRight className="w-4 h-4" />
+            </button>
+            <button onClick={() => navigate("/app/chat")} data-testid="start-voice-cta"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-600 text-white px-6 py-3 font-medium transition-transform duration-300 hover:scale-[1.03] active:scale-95 shadow-md shadow-emerald-600/20">
+              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+              {lang === "hi" ? "आवाज़ में पूछें (Web Speech)" : lang === "mr" ? "आवाजात विचारा (Web Speech)" : "Voice Query (Web Speech)"}
+            </button>
+            <button onClick={() => navigate("/app/forms")} data-testid="auto-form-cta"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-3 font-medium transition-transform duration-300 hover:scale-[1.03] active:scale-95 shadow-md shadow-orange-600/20">
+              <FileCheck className="w-4.5 h-4.5" />
+              {lang === "hi" ? "ऑटो फॉर्म भरें (Auto Form Filler)" : lang === "mr" ? "ऑटो फॉर्म भरा (Auto Form Filler)" : "Auto Form Filler"}
+            </button>
+            <button onClick={() => navigate("/app/nlp")} data-testid="nlp-studio-cta"
+              className="inline-flex items-center gap-2 rounded-full border border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-400 px-6 py-3 font-medium transition-colors duration-300 hover:bg-purple-500/20">
+              <Cpu className="w-4.5 h-4.5" /> {lang === "hi" ? "एनएलपी स्टूडियो" : lang === "mr" ? "एनएलपी स्टुडिओ" : "NLP Studio"}
             </button>
             <button onClick={() => setShowElig(true)} data-testid="eligibility-cta"
               className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/5 text-primary px-6 py-3 font-medium transition-colors duration-300 hover:bg-primary/10">

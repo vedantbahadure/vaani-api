@@ -9,6 +9,7 @@ import {
   detectLanguage,
   retrieve,
   streamAnswer,
+  generateLocalAnswer,
   translateQueryToEnglish,
   searchChunks,
   computeConfidence,
@@ -25,7 +26,15 @@ import {
   ChatRoleConfig,
   selectModel,
 } from "./server/gemini";
+import {
+  getGeminiApiKey,
+  getGroqApiKey,
+  getOpenRouterApiKey,
+  getOpenAiApiKey,
+} from "./server/llm/manager";
 import { Citation } from "./server/types";
+import { FORM_TEMPLATES, autoFillFormWithGemini } from "./server/forms";
+import { analyzeQueryLocally, analyzeQueryWithGemini } from "./server/nlp";
 
 const app = express();
 const PORT = 3000;
@@ -55,6 +64,55 @@ api.get("/health", (req: Request, res: Response) => {
   });
 });
 
+api.get("/status", async (req: Request, res: Response) => {
+  const hw = getHardware();
+  const docCount = await db.documentCount();
+  const domainCounts = await db.domainCounts();
+  const vecCount = db.vectorCount();
+
+  res.json({
+    mode: process.env.VAANI_MODE || "showcase",
+    app: "VAANI — AI for Rural India",
+    subsystems: {
+      llm: {
+        provider: "gemini",
+        models: ["gemini-3.7-flash", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite"],
+        active_model: "gemini-3.7-flash",
+        status: "online",
+      },
+      stt: {
+        model: "gemini-3.5-transcribe",
+        status: "online",
+      },
+      tts: {
+        model: "gemini-3.1-flash-tts-preview",
+        voice: "Kore (warm & clear)",
+        status: "online",
+      },
+      vector_store: {
+        engine: "in-memory / chroma",
+        vectors: vecCount,
+        status: "online",
+      },
+      database: {
+        engine: "Firebase Firestore / in-memory",
+        status: "online",
+      },
+    },
+    knowledge: {
+      documents: docCount,
+      domains: domainCounts,
+      vectors: vecCount,
+      rag_threshold: RAG_SCORE_THRESHOLD,
+    },
+    hardware: {
+      adapter: hw.name,
+      description: hw.description,
+    },
+    languages: SUPPORTED_LANGS,
+  });
+});
+
 api.get("/system/status", async (req: Request, res: Response) => {
   const hw = getHardware();
   const docCount = await db.documentCount();
@@ -66,8 +124,8 @@ api.get("/system/status", async (req: Request, res: Response) => {
     subsystems: {
       llm: {
         provider: "gemini",
-        models: ["gemini-3.1-pro-preview", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-3.1-flash-live-preview"],
-        active_model: "gemini-3.5-flash",
+        models: ["gemini-3.7-flash", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite", "gemini-3.1-flash-live-preview"],
+        active_model: "gemini-3.7-flash",
         status: "online",
       },
       stt: {
@@ -182,7 +240,8 @@ api.post("/chat/stream", async (req: Request, res: Response) => {
   let capturedGroundingMetadata: any = null;
 
   try {
-    if (process.env.GEMINI_API_KEY) {
+    const hasAnyLlmKey = getGeminiApiKey() || getGroqApiKey() || getOpenRouterApiKey() || getOpenAiApiKey();
+    if (hasAnyLlmKey) {
       // Format multi-turn conversation history for Gemini
       const formattedContents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> = [];
 
@@ -200,11 +259,151 @@ api.post("/chat/stream", async (req: Request, res: Response) => {
 
       // Add RAG context snippet if available
       let userPromptWithContext = message;
-      if (ragResult.chunks.length > 0) {
+      if (ragResult.chunks.length > 0 && ragResult.grounded) {
         const ragContextText = ragResult.chunks
           .map((c, i) => `[Source ${i + 1} - ${c.title} (${c.domain})]: ${c.text}`)
           .join("\n\n");
-        userPromptWithContext = `Context from official rural governance databases:\n${ragContextText}\n\nUser Question:\n${message}`;
+        userPromptWithContext = `Relevant background context from verified database:\n${ragContextText}\n\nUser Question:\n${message}\n\n(Synthesize the background context if relevant to the question, and answer thoroughly using your full knowledge.)`;
+      }
+
+      formattedContents.push({
+        role: "user",
+        parts: [{ text: userPromptWithContext }],
+      });
+
+      const roleConfig: ChatRoleConfig = {
+        rolePersona,
+        modelTier,
+        enableSearch,
+        enableMaps,
+      };
+
+      try {
+        for await (const chunk of streamGeminiChatResponse({
+          contents: formattedContents,
+          roleConfig,
+          language,
+        })) {
+          if (chunk.delta) {
+            fullAnswerTokens.push(chunk.delta);
+            res.write(formatSSE("token", { delta: chunk.delta }));
+          }
+          if (chunk.groundingMetadata) {
+            capturedGroundingMetadata = chunk.groundingMetadata;
+            res.write(formatSSE("grounding", chunk.groundingMetadata));
+          }
+        }
+      } catch (streamErr: any) {
+        console.warn("LLM stream threw error, engaging local RAG generator:", streamErr?.message || streamErr);
+      }
+    }
+
+    // If no tokens generated (e.g. no key, network drop, quota), stream from local RAG engine
+    if (fullAnswerTokens.length === 0) {
+      for await (const token of streamAnswer(message, ragResult)) {
+        fullAnswerTokens.push(token);
+        res.write(formatSSE("token", { delta: token }));
+      }
+    }
+
+    // Guarantee non-empty answer
+    const answer = fullAnswerTokens.join("").trim() || generateLocalAnswer(message, ragResult);
+    const assistantMsg = await db.addMessage({
+      conversation_id: conv.id,
+      role: "assistant",
+      content: answer,
+      language,
+      confidence: ragResult.confidence || 0.88,
+      grounded: ragResult.grounded || enableSearch || enableMaps,
+      citations: ragResult.citations,
+    });
+
+    await db.touchConversation(conv.id);
+
+    res.write(
+      formatSSE("done", {
+        message_id: assistantMsg.id,
+        conversation_id: conv.id,
+        groundingMetadata: capturedGroundingMetadata,
+      })
+    );
+  } catch (err: any) {
+    console.error("Critical chat error:", err);
+    const fallbackAnswer = generateLocalAnswer(message, ragResult);
+    res.write(formatSSE("token", { delta: fallbackAnswer }));
+    res.write(
+      formatSSE("done", {
+        message_id: `msg-${Date.now()}`,
+        conversation_id: conv.id,
+      })
+    );
+  } finally {
+    res.end();
+  }
+});
+
+// Non-streaming standard JSON chat endpoint
+api.post("/chat", async (req: Request, res: Response) => {
+  const {
+    message,
+    conversation_id,
+    language: reqLang,
+    domain,
+    history = [],
+    rolePersona = "rural_advisor",
+    modelTier = "flash",
+    enableSearch = false,
+    enableMaps = false,
+  } = req.body || {};
+
+  if (!message || typeof message !== "string" || !message.trim()) {
+    res.status(400).json({ error: "Message cannot be empty." });
+    return;
+  }
+
+  const language =
+    reqLang && reqLang in SUPPORTED_LANGS
+      ? reqLang
+      : detectLanguage(message);
+
+  let conv = conversation_id ? await db.getConversation(conversation_id) : null;
+  if (!conv) {
+    conv = await db.createConversation(message.trim().slice(0, 60), language);
+  }
+
+  await db.addMessage({
+    conversation_id: conv.id,
+    role: "user",
+    content: message,
+    language,
+  });
+
+  const searchQuery = await translateQueryToEnglish(message, language);
+  const ragResult = retrieve(searchQuery, language, domain);
+  const fullAnswerTokens: string[] = [];
+
+  try {
+    const hasAnyLlmKey = getGeminiApiKey() || getGroqApiKey() || getOpenRouterApiKey() || getOpenAiApiKey();
+    if (hasAnyLlmKey) {
+      const formattedContents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> = [];
+
+      if (Array.isArray(history)) {
+        for (const item of history.slice(-8)) {
+          if (item.role === "user" || item.role === "assistant") {
+            formattedContents.push({
+              role: item.role === "assistant" ? "model" : "user",
+              parts: [{ text: item.content || "" }],
+            });
+          }
+        }
+      }
+
+      let userPromptWithContext = message;
+      if (ragResult.chunks.length > 0 && ragResult.grounded) {
+        const ragContextText = ragResult.chunks
+          .map((c, i) => `[Source ${i + 1} - ${c.title} (${c.domain})]: ${c.text}`)
+          .join("\n\n");
+        userPromptWithContext = `Relevant background context from verified database:\n${ragContextText}\n\nUser Question:\n${message}`;
       }
 
       formattedContents.push({
@@ -226,49 +425,41 @@ api.post("/chat/stream", async (req: Request, res: Response) => {
       })) {
         if (chunk.delta) {
           fullAnswerTokens.push(chunk.delta);
-          res.write(formatSSE("token", { delta: chunk.delta }));
         }
-        if (chunk.groundingMetadata) {
-          capturedGroundingMetadata = chunk.groundingMetadata;
-          res.write(formatSSE("grounding", chunk.groundingMetadata));
-        }
-      }
-    } else {
-      // Fallback in-memory RAG stream if GEMINI_API_KEY is not provided
-      for await (const token of streamAnswer(message, ragResult)) {
-        fullAnswerTokens.push(token);
-        res.write(formatSSE("token", { delta: token }));
       }
     }
 
-    const answer = fullAnswerTokens.join("").trim() || "…";
+    const answer = fullAnswerTokens.join("").trim() || generateLocalAnswer(message, ragResult);
     const assistantMsg = await db.addMessage({
       conversation_id: conv.id,
       role: "assistant",
       content: answer,
       language,
-      confidence: ragResult.confidence,
+      confidence: ragResult.confidence || 0.88,
       grounded: ragResult.grounded || enableSearch || enableMaps,
       citations: ragResult.citations,
     });
 
     await db.touchConversation(conv.id);
 
-    res.write(
-      formatSSE("done", {
-        message_id: assistantMsg.id,
-        conversation_id: conv.id,
-        groundingMetadata: capturedGroundingMetadata,
-      })
-    );
+    res.json({
+      reply: answer,
+      message_id: assistantMsg.id,
+      conversation_id: conv.id,
+      language,
+      grounded: ragResult.grounded || enableSearch || enableMaps,
+      confidence: ragResult.confidence,
+      citations: ragResult.citations,
+    });
   } catch (err: any) {
-    res.write(
-      formatSSE("error", {
-        message: `VAANI could not complete the response: ${err?.message || "Unknown error"}`,
-      })
-    );
-  } finally {
-    res.end();
+    const fallbackAnswer = generateLocalAnswer(message, ragResult);
+    res.json({
+      reply: fallbackAnswer,
+      conversation_id: conv.id,
+      language,
+      grounded: ragResult.grounded,
+      citations: ragResult.citations,
+    });
   }
 });
 
@@ -346,7 +537,82 @@ api.post("/translate", async (req: Request, res: Response) => {
   }
 });
 
+// ---------------- Natural Language Processing (NLP & NLU) ----------------
+api.post("/nlp/analyze", async (req: Request, res: Response) => {
+  const { query, language, useDeepAnalysis } = req.body || {};
+  if (!query || typeof query !== "string" || !query.trim()) {
+    res.status(400).json({ error: "Query is required for NLP analysis." });
+    return;
+  }
+
+  const lang = language && language in SUPPORTED_LANGS ? language : detectLanguage(query);
+
+  try {
+    if (useDeepAnalysis && getGeminiApiKey()) {
+      const deepResult = await analyzeQueryWithGemini(query.trim(), lang);
+      res.json(deepResult);
+    } else {
+      const fastResult = analyzeQueryLocally(query.trim(), lang);
+      res.json(fastResult);
+    }
+  } catch (err: any) {
+    console.error("NLP analysis error:", err);
+    const fallback = analyzeQueryLocally(query.trim(), lang);
+    res.json(fallback);
+  }
+});
+
+api.post("/nlp/summarize", async (req: Request, res: Response) => {
+  const { text, language } = req.body || {};
+  if (!text || typeof text !== "string" || !text.trim()) {
+    res.status(400).json({ error: "Text is required for summarization." });
+    return;
+  }
+
+  const lang = language || "en";
+  try {
+    const system = `You are a concise citizen-summary engine for rural India. Summarize the following information into 3 crisp, highly actionable bullet points in ${SUPPORTED_LANGS[lang] || "the same language"}. Focus on eligibility, documents required, and financial amount.`;
+    const summary = await completeWithGemini(system, text);
+    const bullets = summary
+      .split("\n")
+      .map((b) => b.replace(/^[-*•\d.]+\s*/, "").trim())
+      .filter((b) => b.length > 0);
+
+    res.json({
+      summary: bullets.length > 0 ? bullets : [summary],
+      language: lang,
+    });
+  } catch (err) {
+    res.json({
+      summary: [text.slice(0, 160) + "..."],
+      language: lang,
+    });
+  }
+});
+
 api.post("/voice/speak", async (req: Request, res: Response) => {
+  const { text, voice } = req.body || {};
+  if (!text || typeof text !== "string" || !text.trim()) {
+    res.status(400).json({ error: "Text cannot be empty." });
+    return;
+  }
+
+  try {
+    const { buffer, mimeType } = await generateSpeechWithGemini(text, voice || "Kore");
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader("Content-Length", buffer.length);
+    res.send(buffer);
+  } catch (err: any) {
+    console.error("TTS generation error:", err?.message || err);
+    res.status(503).json({
+      error: "TTS service unavailable",
+      message: err?.message || "Could not generate speech",
+    });
+  }
+});
+
+// Alias for /tts
+api.post("/tts", async (req: Request, res: Response) => {
   const { text, voice } = req.body || {};
   if (!text || typeof text !== "string" || !text.trim()) {
     res.status(400).json({ error: "Text cannot be empty." });
@@ -484,6 +750,48 @@ api.post("/documents/:id/ask", async (req: Request, res: Response) => {
     res.write(formatSSE("error", { message: err?.message || "Stream failed" }));
   } finally {
     res.end();
+  }
+});
+
+// ---------------- Government Scheme Forms & Auto-Filler ----------------
+api.get("/forms/templates", (req: Request, res: Response) => {
+  res.json(FORM_TEMPLATES);
+});
+
+api.get("/forms/templates/:id", (req: Request, res: Response) => {
+  const form = FORM_TEMPLATES.find((f) => f.id === req.params.id);
+  if (!form) {
+    res.status(404).json({ error: "Form template not found." });
+    return;
+  }
+  res.json(form);
+});
+
+api.post("/forms/auto-fill", upload.single("document") as any, async (req: Request, res: Response) => {
+  try {
+    const file = req.file;
+    const { formTypeId, prompt, language } = req.body || {};
+
+    let fileBase64: string | undefined;
+    let fileMimeType: string | undefined;
+
+    if (file) {
+      fileBase64 = file.buffer.toString("base64");
+      fileMimeType = file.mimetype || "image/jpeg";
+    }
+
+    const result = await autoFillFormWithGemini({
+      formTypeId,
+      rawTextPrompt: prompt,
+      fileBase64,
+      fileMimeType,
+      targetLang: language || "en",
+    });
+
+    res.json(result);
+  } catch (err: any) {
+    console.error("Form auto-fill error:", err);
+    res.status(500).json({ error: "Form auto-filling failed", message: err?.message || err });
   }
 });
 
